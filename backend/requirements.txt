@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+google-generativeai
+yfinance
+statsmodels
+numpy
+scipy
+pandas
+openpyxl
+sentence-transformers
+torch
+pydantic
+python-multipart
+python-dotenv
+arcis

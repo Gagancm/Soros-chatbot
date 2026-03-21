@@ -1221,18 +1221,109 @@
   box-shadow: 3px 3px 0 var(--shadow);
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== MOBILE BOTTOM NAV (visible ≤720px) ===== */
+.app-shell__mobile-nav {
+  display: none;
+}
+
+/* ===== RESPONSIVE — TABLET (≤1024px) ===== */
+@media (max-width: 1024px) {
+  .chat-page {
+    max-width: 100%;
+    padding: 1.25rem 1.5rem 1rem;
+  }
+
+  .page-layout {
+    max-width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  .chat-welcome__sprite {
+    width: 380px;
+    height: 380px;
+  }
+
+  .chat-welcome__heading {
+    font-size: 4rem;
+  }
+
+  .chat-message {
+    max-width: 90%;
+  }
+
+  .pairs-stats {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+/* ===== RESPONSIVE — MOBILE (≤720px) ===== */
 @media (max-width: 720px) {
   .app-shell {
     grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 60px;
   }
 
   .app-shell__icon-sidebar {
     display: none;
   }
 
+  /* Mobile bottom nav bar */
+  .app-shell__mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: var(--sidebar);
+    padding: 0.5rem 0.75rem;
+    gap: 0.25rem;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .app-shell__mobile-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .app-shell__mobile-link:hover,
+  .app-shell__mobile-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .app-shell__mobile-link--pink {
+    color: var(--accent);
+  }
+
+  .app-shell__mobile-link--pink:hover,
+  .app-shell__mobile-link--pink.active {
+    color: var(--accent);
+    background: rgba(255, 179, 239, 0.15);
+  }
+
+  .app-shell__mobile-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
   .page-layout {
     padding: 1.5rem 1rem;
+    padding-bottom: 2rem;
   }
 
   .page-layout__header {
@@ -1240,33 +1331,266 @@
     gap: 0.75rem;
   }
 
+  .page-layout__title {
+    font-size: 1.5rem;
+  }
+
   .chat-page {
     padding: 1rem;
+    height: calc(100vh - 60px);
   }
 
   .chat-welcome__heading {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
 
   .chat-welcome__sprite {
-    width: 320px;
-    height: 320px;
+    width: 260px;
+    height: 260px;
+  }
+
+  .chat-welcome__sub {
+    font-size: 0.88rem;
+    max-width: 320px;
+  }
+
+  .chat-welcome__glow {
+    width: 350px;
+    height: 350px;
+  }
+
+  .chat-message {
+    max-width: 92%;
+    gap: 0.5rem;
+  }
+
+  .chat-message__avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.55rem;
+  }
+
+  .chat-message__content {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .chat-message__role {
+    font-size: 0.62rem;
   }
 
   .feature-chips {
     flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .feature-chip {
+    padding: 0.35rem 0.65rem 0.35rem 0.45rem;
+    font-size: 0.7rem;
+  }
+
+  .feature-chip__icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .chat-bottom-bar {
+    padding: 0.6rem 0.7rem;
+    gap: 0.5rem;
   }
 
   .chat-input {
-    flex-direction: row;
+    padding: 0.4rem 0.4rem 0.4rem 0.75rem;
+  }
+
+  .chat-input__textarea {
+    font-size: 0.85rem;
+  }
+
+  .chat-input__button {
+    width: 34px;
+    height: 34px;
   }
 
   .page-form__row {
     flex-direction: column;
   }
 
+  .page-form__field {
+    min-width: 100%;
+  }
+
   .page-form__actions {
     margin-left: 0;
+  }
+
+  .page-form__actions button {
+    width: 100%;
+  }
+
+  .page-card {
+    padding: 1rem;
+  }
+
+  .page-card__heading {
+    font-size: 0.95rem;
+  }
+
+  .page-error {
+    left: 1rem;
+    right: 1rem;
+    top: 0.75rem;
+  }
+
+  .settings-panel__card {
+    position: fixed;
+    bottom: 70px;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
+
+  .settings-panel__card--bottom-left {
+    bottom: 70px;
+    left: 1rem;
+    margin: 0;
+  }
+
+  .pairs-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-item {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .history-item__title {
+    font-size: 0.82rem;
+  }
+
+  .fin-table th,
+  .fin-table td,
+  .pairs-table th,
+  .pairs-table td {
+    padding: 0.35rem 0.45rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* ===== RESPONSIVE — SMALL MOBILE (≤480px) ===== */
+@media (max-width: 480px) {
+  .chat-page {
+    padding: 0.75rem 0.6rem;
+  }
+
+  .page-layout {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .page-layout__title {
+    font-size: 1.3rem;
+  }
+
+  .page-layout__intro {
+    font-size: 0.8rem;
+  }
+
+  .chat-welcome__heading {
+    font-size: 2rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .chat-welcome__heading em {
+    -webkit-text-stroke: 2px var(--purple);
+  }
+
+  .chat-welcome__sprite {
+    width: 200px;
+    height: 200px;
+  }
+
+  .chat-welcome__sub {
+    font-size: 0.82rem;
+    max-width: 280px;
+  }
+
+  .chat-message {
+    max-width: 95%;
+  }
+
+  .chat-message__content {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .feature-chip__label {
+    display: none;
+  }
+
+  .feature-chip {
+    padding: 0.4rem;
+  }
+
+  .chat-bottom-bar {
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+
+  .chat-input {
+    border-radius: 8px;
+  }
+
+  .page-card {
+    border-radius: 8px;
+    padding: 0.85rem;
+  }
+
+  .pairs-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .pairs-stat {
+    padding: 0.6rem;
+  }
+
+  .pairs-stat__label {
+    font-size: 0.65rem;
+  }
+
+  .pairs-stat__value {
+    font-size: 0.88rem;
+  }
+
+  .app-shell__mobile-nav {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .app-shell__mobile-label {
+    font-size: 0.55rem;
+  }
+}
+
+/* ===== RESPONSIVE — HEIGHT (short screens / landscape) ===== */
+@media (max-height: 600px) {
+  .chat-welcome__sprite {
+    width: 180px;
+    height: 180px;
+  }
+
+  .chat-welcome__heading {
+    font-size: 2.2rem;
+  }
+
+  .chat-welcome {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  .chat-welcome__glow {
+    width: 250px;
+    height: 250px;
   }
 }
 

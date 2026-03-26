@@ -3,11 +3,16 @@ import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { ChatHistory } from '../components/ChatHistory.jsx'
 import { ChatInput } from '../components/ChatInput.jsx'
+import { CustomSelect } from '../components/CustomSelect.jsx'
 
 const DEFAULT_API_BASE = 'http://localhost:8000'
+const MODEL_PROVIDER_OPTIONS = [
+  { value: 'gemini', label: 'Gemini' },
+  { value: 'local', label: 'Local' },
+]
 const LOCAL_MODEL_OPTIONS = [
-  { value: 'Qwen/Qwen2.5-3B-Instruct', label: 'Qwen2.5 3B Instruct' },
-  { value: 'microsoft/Phi-3.5-mini-instruct', label: 'Phi-3.5 Mini Instruct (3.8B)' },
+  { value: 'Qwen/Qwen2.5-3B-Instruct', label: 'Qwen 3B' },
+  { value: 'microsoft/Phi-3.5-mini-instruct', label: 'Phi-3.5' },
 ]
 
 export function ChatPage() {
@@ -300,36 +305,23 @@ export function ChatPage() {
               <span className="feature-chip__label">{mode.charAt(0).toUpperCase() + mode.slice(1)}</span>
             </button>
           ))}
-        </div>
-        <div className="chat-model-select">
-          <label htmlFor="model-provider">Model</label>
-          <select
-            id="model-provider"
-            value={modelProvider}
-            onChange={(e) => setModelProvider(e.target.value)}
-            disabled={isLoading}
-          >
-            <option value="gemini">Gemini API</option>
-            <option value="local">Local Small Model</option>
-          </select>
-        </div>
-        {modelProvider === 'local' && (
-          <div className="chat-model-select">
-            <label htmlFor="local-model-name">Local model</label>
-            <select
-              id="local-model-name"
-              value={localModelName}
-              onChange={(e) => setLocalModelName(e.target.value)}
+          <div className="model-selects">
+            <CustomSelect
+              options={MODEL_PROVIDER_OPTIONS}
+              value={modelProvider}
+              onChange={setModelProvider}
               disabled={isLoading}
-            >
-              {LOCAL_MODEL_OPTIONS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+            />
+            {modelProvider === 'local' && (
+              <CustomSelect
+                options={LOCAL_MODEL_OPTIONS}
+                value={localModelName}
+                onChange={setLocalModelName}
+                disabled={isLoading}
+              />
+            )}
           </div>
-        )}
+        </div>
 
         <ChatInput
           onSend={handleSend}

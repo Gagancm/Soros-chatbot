@@ -5,6 +5,10 @@ import { ChatHistory } from '../components/ChatHistory.jsx'
 import { ChatInput } from '../components/ChatInput.jsx'
 
 const DEFAULT_API_BASE = 'http://localhost:8000'
+const LOCAL_MODEL_OPTIONS = [
+  { value: 'Qwen/Qwen2.5-3B-Instruct', label: 'Qwen2.5 3B Instruct' },
+  { value: 'microsoft/Phi-3.5-mini-instruct', label: 'Phi-3.5 Mini Instruct (3.8B)' },
+]
 
 export function ChatPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -16,6 +20,8 @@ export function ChatPage() {
   const [attachedFile, setAttachedFile] = useState(null)
   const [fileContext, setFileContext] = useState(null)
   const [activeMode, setActiveMode] = useState(null)
+  const [modelProvider, setModelProvider] = useState('gemini')
+  const [localModelName, setLocalModelName] = useState(LOCAL_MODEL_OPTIONS[0].value)
   const fileInputRef = useRef(null)
   const saveTimeout = useRef(null)
 
@@ -56,6 +62,8 @@ export function ChatPage() {
       setAttachedFile(null)
       setFileContext(null)
       setActiveMode(null)
+      setModelProvider('gemini')
+      setLocalModelName(LOCAL_MODEL_OPTIONS[0].value)
       setSearchParams({}, { replace: true })
       return
     }
@@ -176,6 +184,8 @@ export function ChatPage() {
           message: userMessage.content,
           file_context: currentFileContext || null,
           mode: activeMode || null,
+          model_provider: modelProvider,
+          local_model_name: modelProvider === 'local' ? localModelName : null,
         }),
       })
 
@@ -291,6 +301,35 @@ export function ChatPage() {
             </button>
           ))}
         </div>
+        <div className="chat-model-select">
+          <label htmlFor="model-provider">Model</label>
+          <select
+            id="model-provider"
+            value={modelProvider}
+            onChange={(e) => setModelProvider(e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="gemini">Gemini API</option>
+            <option value="local">Local Small Model</option>
+          </select>
+        </div>
+        {modelProvider === 'local' && (
+          <div className="chat-model-select">
+            <label htmlFor="local-model-name">Local model</label>
+            <select
+              id="local-model-name"
+              value={localModelName}
+              onChange={(e) => setLocalModelName(e.target.value)}
+              disabled={isLoading}
+            >
+              {LOCAL_MODEL_OPTIONS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <ChatInput
           onSend={handleSend}

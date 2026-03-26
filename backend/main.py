@@ -3,13 +3,14 @@ import sys
 import io
 import json
 import uuid
+import asyncio
 
 from dotenv import load_dotenv
 load_dotenv()
 import math
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +31,13 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 from rag import create_default_rag_service, RAGService
+from local_llm import (
+    build_local_prompt,
+    generate_local_with_limits,
+    normalize_model_provider,
+    LocalModelBusyError,
+    LocalModelTimeoutError,
+)
 
 # Paths
 _BASE = Path(__file__).resolve().parent
@@ -81,6 +89,8 @@ class RAGRequest(BaseModel):
     message: str
     file_context: Optional[str] = None
     mode: Optional[str] = None
+    model_provider: Optional[Literal["gemini", "local"]] = None
+    local_model_name: Optional[str] = None
 
 class RAGResponse(BaseModel):
     reply: str
@@ -119,6 +129,32 @@ def _gemini():
     genai.configure(api_key=key)
     name = os.getenv("GEMINI_MODEL_NAME", "models/gemini-2.5-flash")
     return genai.GenerativeModel(name)
+
+
+def _generate_gemini_reply(prompt: str) -> str:
+    resp = _gemini().generate_content(prompt, generation_config=GEN_CONFIG)
+    text = _extract_text(resp)
+    if not text:
+        return SAFETY_MSG
+    return text
+
+
+def _build_full_prompt(req: "RAGRequest", result: dict) -> str:
+    prompt = result["prompt"]
+    if req.file_context:
+        prompt += f"\n\n[CONTEXT - UPLOADED FILE DATA]\n{req.file_context}"
+    if req.mode in MODE_BOOST:
+        prompt += MODE_BOOST[req.mode]
+    return prompt
+
+
+async def _generate_local_with_limits(prompt: str, local_model_name: Optional[str]) -> str:
+    try:
+        return await generate_local_with_limits(prompt, local_model_name)
+    except LocalModelBusyError as exc:
+        raise HTTPException(429, detail=str(exc))
+    except LocalModelTimeoutError as exc:
+        raise HTTPException(504, detail=str(exc))
 
 
 def _float(val) -> Optional[float]:
@@ -230,18 +266,27 @@ async def rag_chat(req: RAGRequest):
     if result.get("error"):
         return RAGResponse(reply=result["error"])
 
-    prompt = result["prompt"]
-    if req.file_context:
-        prompt += f"\n\n[CONTEXT - UPLOADED FILE DATA]\n{req.file_context}"
-    if req.mode in MODE_BOOST:
-        prompt += MODE_BOOST[req.mode]
+    prompt = _build_full_prompt(req, result)
+    provider = normalize_model_provider(req.model_provider)
 
     try:
-        resp = _gemini().generate_content(prompt, generation_config=GEN_CONFIG)
-        text = _extract_text(resp)
-        if not text:
-            return RAGResponse(reply=SAFETY_MSG)
+        if provider == "local":
+            text = await _generate_local_with_limits(
+                build_local_prompt(
+                    message=req.message,
+                    file_context=req.file_context,
+                    mode=req.mode,
+                    ticker=result.get("ticker"),
+                    retrieved=result.get("retrieved") or [],
+                    enabled_modes=set(MODE_BOOST),
+                ),
+                req.local_model_name,
+            )
+        else:
+            text = await asyncio.to_thread(_generate_gemini_reply, prompt)
         return RAGResponse(reply=text)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(500, detail=f"Generation failed: {exc}")
 

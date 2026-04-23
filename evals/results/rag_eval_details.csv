@@ -1,0 +1,31 @@
+question,expected_label,top_label,top_score,label_match_at_1,label_match_at_5,keyword_match_at_5,latency_ms
+How did Soros think about protecting capital during uncertain markets?,Risk Management,Personal Life,0.8234,False,False,True,1249.84
+Why is downside protection important in Soros-style investing?,Risk Management,Risk Management,0.6548,True,True,True,261.24
+How would Soros approach a trade when the market is highly volatile?,Risk Management,Timing,0.7621,False,False,True,103.82
+What role does position sizing play in Soros's investment approach?,Risk Management,Personal Life,0.8389,False,False,True,74.7
+Why would Soros avoid being overconfident in a trade?,Risk Management,Strategy Development,0.8026,False,False,True,10.82
+How did Soros develop his broader investment strategy?,Strategy Development,Strategy Development,0.8264,True,True,True,248.88
+Why is reflexivity important in Soros's strategy?,Strategy Development,Risk Management,0.7705,False,True,True,13.27
+How would Soros analyze a market bubble?,Strategy Development,Adaptability,0.8173,False,False,True,247.8
+Why did Soros focus on macroeconomic imbalances?,Strategy Development,Strategy Development,0.8059,True,True,True,8.76
+How does Soros connect theory with trading strategy?,Strategy Development,Strategy Development,0.8172,True,True,True,8.02
+How does market psychology affect investor behavior?,Psychology,Psychology,0.7429,True,True,True,250.37
+Why did Soros pay attention to crowd behavior?,Psychology,Personal Life,0.7538,False,True,True,12.49
+How can fear and greed influence markets?,Psychology,Psychology,0.6389,True,True,True,8.08
+Why are investor beliefs important in reflexivity?,Psychology,Risk Management,0.711,False,True,True,7.87
+How would Soros interpret irrational market behavior?,Psychology,Adaptability,0.8954,False,False,True,7.47
+How did Soros adapt when his assumptions were wrong?,Adaptability,Personal Life,0.7818,False,False,True,249.53
+Why is flexibility important in Soros's thinking?,Adaptability,Risk Management,0.8132,False,True,True,12.62
+How would Soros respond to changing market conditions?,Adaptability,Risk Management,0.7739,False,True,True,7.63
+Why did Soros value changing his mind quickly?,Adaptability,Personal Life,0.7634,False,False,False,7.61
+How does adaptability reduce investment risk?,Adaptability,Adaptability,0.7164,True,True,True,7.65
+Why is timing important in Soros's investment approach?,Timing,Timing,0.7809,True,True,True,7.83
+How would Soros think about entering a trade too early?,Timing,Timing,0.8501,True,True,True,7.09
+Why does market timing matter during a crisis?,Timing,Timing,0.6432,True,True,True,7.48
+How did Soros think about exits from a position?,Timing,Timing,0.8032,True,True,True,7.62
+Why is patience important before acting on a market idea?,Timing,Psychology,0.6417,False,True,True,7.6
+What early life experiences shaped Soros's thinking?,Personal Life,Personal Life,0.7657,True,True,True,7.65
+How did Soros's background influence his worldview?,Personal Life,Personal Life,0.7518,True,True,True,7.59
+Why is Soros's personal history relevant to his philosophy?,Personal Life,Personal Life,0.7645,True,True,True,7.65
+How did Soros's education influence his ideas?,Personal Life,Personal Life,0.7894,True,True,False,7.72
+What shaped Soros's interest in open societies?,Personal Life,Strategy Development,0.8152,False,True,True,7.91

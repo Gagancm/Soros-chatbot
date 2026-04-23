@@ -86,16 +86,22 @@ GEN_CONFIG = genai.types.GenerationConfig(
 
 # --- Models ---
 
+class HistoryMessage(BaseModel):
+    role: str   # "user" | "assistant"
+    content: str
+
 class RAGRequest(BaseModel):
     message: str
     file_context: Optional[str] = None
     mode: Optional[str] = None
     model_provider: Optional[Literal["gemini", "local"]] = None
     local_model_name: Optional[str] = None
+    history: Optional[list[HistoryMessage]] = None
 
 class RAGResponse(BaseModel):
     reply: str
     skills_used: Optional[list[str]] = None
+    sources: Optional[list[dict]] = None
 
 class PairsRequest(BaseModel):
     stock1: str
@@ -141,7 +147,10 @@ def _generate_gemini_reply(prompt: str) -> str:
     return text
 
 
-def _generate_gemini_with_skills(prompt: str) -> tuple[str, list[str]]:
+def _generate_gemini_with_skills(
+    prompt: str,
+    history: list[dict] | None = None,
+) -> tuple[str, list[str]]:
     """Agentic tool-calling loop. Returns (reply_text, skills_invoked)."""
     key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not key:
@@ -149,8 +158,14 @@ def _generate_gemini_with_skills(prompt: str) -> tuple[str, list[str]]:
     genai.configure(api_key=key)
     model_name = os.getenv("GEMINI_MODEL_NAME", "models/gemini-2.5-flash")
 
+    # Convert history to Gemini format (role: "user"/"model")
+    gemini_history = []
+    for msg in (history or []):
+        role = "model" if msg["role"] == "assistant" else "user"
+        gemini_history.append({"role": role, "parts": [msg["content"]]})
+
     model = genai.GenerativeModel(model_name, tools=SKILL_DEFINITIONS)
-    chat = model.start_chat()
+    chat = model.start_chat(history=gemini_history)
     skills_invoked: list[str] = []
 
     response = chat.send_message(prompt, generation_config=GEN_CONFIG)
@@ -354,8 +369,20 @@ async def rag_chat(req: RAGRequest):
             )
             return RAGResponse(reply=text)
         else:
-            text, skills = await asyncio.to_thread(_generate_gemini_with_skills, prompt)
-            return RAGResponse(reply=text, skills_used=skills if skills else None)
+            # Keep last 10 messages (5 turns) to stay within token budget
+            history = [m.model_dump() for m in (req.history or [])[-10:]]
+            text, skills = await asyncio.to_thread(
+                _generate_gemini_with_skills, prompt, history
+            )
+            sources = [
+                {"question": item["question"], "score": round(item["score"], 3)}
+                for item in (result.get("retrieved") or [])[:3]
+            ]
+            return RAGResponse(
+                reply=text,
+                skills_used=skills if skills else None,
+                sources=sources if sources else None,
+            )
     except HTTPException:
         raise
     except Exception as exc:

@@ -53,6 +53,25 @@ export function ChatMessage({ message, lifted }) {
             <ReactMarkdown>{message.content}</ReactMarkdown>
           )}
         </div>
+
+        {/* RAG sources citation */}
+        {!isUser && message.sources?.length > 0 && (
+          <details className="chat-message__sources">
+            <summary className="chat-message__sources-toggle">
+              Sources ({message.sources.length})
+            </summary>
+            <ol className="chat-message__sources-list">
+              {message.sources.map((src, i) => (
+                <li key={i} className="chat-message__source-item">
+                  <span className="chat-message__source-q">{src.question}</span>
+                  <span className="chat-message__source-score">
+                    {(src.score * 100).toFixed(0)}% match
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
       </div>
     </div>
   )

@@ -1247,6 +1247,64 @@
   opacity: 0.8;
 }
 
+/* -- RAG sources citation -- */
+.chat-message__sources {
+  margin-top: 0.6rem;
+  border-top: 1.5px solid var(--border);
+  padding-top: 0.5rem;
+}
+
+.chat-message__sources-toggle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.chat-message__sources-toggle::-webkit-details-marker { display: none; }
+
+.chat-message__sources-toggle::before {
+  content: '▸ ';
+}
+
+details[open] .chat-message__sources-toggle::before {
+  content: '▾ ';
+}
+
+.chat-message__sources-list {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chat-message__source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.chat-message__source-q {
+  color: var(--text-muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-message__source-score {
+  font-weight: 700;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
 /* ===== SETTINGS PANEL ===== */
 .settings-panel {
   position: relative;

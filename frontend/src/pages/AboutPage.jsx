@@ -6,7 +6,7 @@ export function AboutPage() {
           <h1 className="page-layout__title">About Soros Advisor</h1>
           <p className="page-layout__intro">
             An educational chatbot exploring George Soros&apos;s investment philosophy through
-            Retrieval-Augmented Generation.
+            Retrieval-Augmented Generation over a curated Q&amp;A corpus.
           </p>
         </div>
       </div>
@@ -22,15 +22,37 @@ export function AboutPage() {
       </div>
 
       <div className="page-card page-card--stagger-2">
+        <h2 className="page-card__heading">What&apos;s inside</h2>
+        <div className="pairs-stats">
+          <div className="pairs-stat">
+            <span className="pairs-stat__label">Chat</span>
+            <span className="pairs-stat__value" style={{ fontSize: 14 }}>RAG + skill routing</span>
+          </div>
+          <div className="pairs-stat">
+            <span className="pairs-stat__label">Pairs Trading</span>
+            <span className="pairs-stat__value" style={{ fontSize: 14 }}>Cointegration + Z-score</span>
+          </div>
+          <div className="pairs-stat">
+            <span className="pairs-stat__label">Financials</span>
+            <span className="pairs-stat__value" style={{ fontSize: 14 }}>Live ratios &amp; statements</span>
+          </div>
+          <div className="pairs-stat">
+            <span className="pairs-stat__label">Models</span>
+            <span className="pairs-stat__value" style={{ fontSize: 14 }}>Gemini + local LLMs</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="page-card page-card--stagger-3">
         <h2 className="page-card__heading">The stack</h2>
         <p className="page-card__text">
-          The frontend is a React single-page app with a chat interface, pairs trading analytics,
-          and financial risk diagnostics. The backend serves a RAG pipeline with semantic search
-          over Soros&apos;s published thinking.
+          React 19 + Vite frontend with React Router. FastAPI backend running a sentence-transformer
+          retrieval pipeline, Gemini and local HuggingFace models for generation, yfinance for market
+          data, and statsmodels for cointegration tests.
         </p>
       </div>
 
-      <div className="page-card page-card--disclaimer page-card--stagger-3">
+      <div className="page-card page-card--disclaimer page-card--stagger-4">
         <p className="page-card__text">
           <strong>Disclaimer:</strong> Nothing produced by this system is investment advice. Always
           do your own research and consult qualified financial professionals before making

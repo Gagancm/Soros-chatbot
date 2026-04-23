@@ -1,8 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
 
 const DEFAULT_API_BASE = 'http://localhost:8000'
+
+const bucketFor = (iso) => {
+  if (!iso) return 'Older'
+  const d = new Date(iso)
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const ts = d.getTime()
+  if (ts >= startOfToday) return 'Today'
+  if (ts >= startOfToday - 24 * 3600 * 1000) return 'Yesterday'
+  if (ts >= startOfToday - 7 * 24 * 3600 * 1000) return 'Previous 7 days'
+  if (ts >= startOfToday - 30 * 24 * 3600 * 1000) return 'Previous 30 days'
+  return 'Older'
+}
+
+const BUCKET_ORDER = ['Today', 'Yesterday', 'Previous 7 days', 'Previous 30 days', 'Older']
 
 export function HistoryPage() {
   const [chats, setChats] = useState([])
@@ -10,9 +25,7 @@ export function HistoryPage() {
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    fetchHistory()
-  }, [])
+  useEffect(() => { fetchHistory() }, [])
 
   const fetchHistory = async () => {
     setIsLoading(true)
@@ -45,22 +58,30 @@ export function HistoryPage() {
     try {
       const d = new Date(iso)
       const now = new Date()
-      const diffMs = now - d
-      const diffMin = Math.floor(diffMs / 60000)
+      const diffMin = Math.floor((now - d) / 60000)
       if (diffMin < 1) return 'Just now'
       if (diffMin < 60) return `${diffMin}m ago`
       const diffHr = Math.floor(diffMin / 60)
       if (diffHr < 24) return `${diffHr}h ago`
       const diffDay = Math.floor(diffHr / 24)
-      return `${diffDay}d ago`
-    } catch {
-      return ''
-    }
+      if (diffDay < 7) return `${diffDay}d ago`
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    } catch { return '' }
   }
 
-  const filtered = chats.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase()),
+  const filtered = useMemo(
+    () => chats.filter((c) => c.title.toLowerCase().includes(search.toLowerCase())),
+    [chats, search],
   )
+
+  const grouped = useMemo(() => {
+    const out = {}
+    for (const c of filtered) {
+      const b = bucketFor(c.updatedAt)
+      ;(out[b] ||= []).push(c)
+    }
+    return BUCKET_ORDER.filter((b) => out[b]?.length).map((b) => ({ name: b, items: out[b] }))
+  }, [filtered])
 
   return (
     <div className="page-layout">
@@ -94,7 +115,7 @@ export function HistoryPage() {
       </div>
 
       {isLoading && (
-        <div className="history-empty page-card--stagger-2">Loading...</div>
+        <div className="history-empty page-card--stagger-2">Loading conversations...</div>
       )}
 
       {error && createPortal(
@@ -113,17 +134,16 @@ export function HistoryPage() {
         </div>
       )}
 
-      {!isLoading && filtered.length > 0 && (
-        <>
-          <div className="history-section-label page-card--stagger-2">
-            Your chats ({filtered.length})
-          </div>
-          <div className="history-list">
-            {filtered.map((chat, i) => (
+      {!isLoading && grouped.map((group, gi) => (
+        <div key={group.name} className={`page-card--stagger-${Math.min(gi + 2, 5)}`}>
+          <div className="history-section-label">{group.name} · {group.items.length}</div>
+          <div className="history-list" style={{ marginTop: 10 }}>
+            {group.items.map((chat, i) => (
               <NavLink
                 to={`/?chat=${chat.id}`}
                 key={chat.id}
-                className={`history-item page-card--stagger-${Math.min(i + 2, 5)}`}
+                className="history-item"
+                style={{ animationDelay: `${0.03 * i}s` }}
               >
                 <div className="history-item__left">
                   <span className="history-item__title">{chat.title}</span>
@@ -144,8 +164,8 @@ export function HistoryPage() {
               </NavLink>
             ))}
           </div>
-        </>
-      )}
+        </div>
+      ))}
     </div>
   )
 }

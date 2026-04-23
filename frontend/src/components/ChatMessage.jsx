@@ -32,6 +32,20 @@ export function ChatMessage({ message, lifted }) {
           </div>
         )}
 
+        {/* Skill invocation badge */}
+        {message.skills_used?.length > 0 && (
+          <div className="chat-message__skill-badges">
+            {message.skills_used.map((skill) => (
+              <span key={skill} className="chat-message__skill-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                {skill.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="chat-message__content">
           {isUser ? (
             <p>{message.content}</p>

@@ -1219,6 +1219,34 @@
   font-weight: 500;
 }
 
+/* -- Skill invocation badges inside assistant messages -- */
+.chat-message__skill-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-message__skill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+
+.chat-message__skill-badge svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
 /* ===== SETTINGS PANEL ===== */
 .settings-panel {
   position: relative;

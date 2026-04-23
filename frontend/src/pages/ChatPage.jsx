@@ -201,7 +201,14 @@ export function ChatPage() {
 
       const data = await res.json()
       const reply = data.reply || 'No reply from backend.'
-      const updated = [...nextMessages, { role: 'assistant', content: reply }]
+      const updated = [
+        ...nextMessages,
+        {
+          role: 'assistant',
+          content: reply,
+          ...(data.skills_used?.length ? { skills_used: data.skills_used } : {}),
+        },
+      ]
       setMessages(updated)
       saveChatNow(currentChatId, updated)
       setAttachedFile(null)

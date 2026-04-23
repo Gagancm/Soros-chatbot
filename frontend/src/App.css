@@ -1219,6 +1219,92 @@
   font-weight: 500;
 }
 
+/* -- Skill invocation badges inside assistant messages -- */
+.chat-message__skill-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-message__skill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+
+.chat-message__skill-badge svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* -- RAG sources citation -- */
+.chat-message__sources {
+  margin-top: 0.6rem;
+  border-top: 1.5px solid var(--border);
+  padding-top: 0.5rem;
+}
+
+.chat-message__sources-toggle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.chat-message__sources-toggle::-webkit-details-marker { display: none; }
+
+.chat-message__sources-toggle::before {
+  content: '▸ ';
+}
+
+details[open] .chat-message__sources-toggle::before {
+  content: '▾ ';
+}
+
+.chat-message__sources-list {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chat-message__source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.chat-message__source-q {
+  color: var(--text-muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-message__source-score {
+  font-weight: 700;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
 /* ===== SETTINGS PANEL ===== */
 .settings-panel {
   position: relative;

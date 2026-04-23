@@ -32,6 +32,20 @@ export function ChatMessage({ message, lifted }) {
           </div>
         )}
 
+        {/* Skill invocation badge */}
+        {message.skills_used?.length > 0 && (
+          <div className="chat-message__skill-badges">
+            {message.skills_used.map((skill) => (
+              <span key={skill} className="chat-message__skill-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                {skill.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="chat-message__content">
           {isUser ? (
             <p>{message.content}</p>
@@ -39,6 +53,25 @@ export function ChatMessage({ message, lifted }) {
             <ReactMarkdown>{message.content}</ReactMarkdown>
           )}
         </div>
+
+        {/* RAG sources citation */}
+        {!isUser && message.sources?.length > 0 && (
+          <details className="chat-message__sources">
+            <summary className="chat-message__sources-toggle">
+              Sources ({message.sources.length})
+            </summary>
+            <ol className="chat-message__sources-list">
+              {message.sources.map((src, i) => (
+                <li key={i} className="chat-message__source-item">
+                  <span className="chat-message__source-q">{src.question}</span>
+                  <span className="chat-message__source-score">
+                    {(src.score * 100).toFixed(0)}% match
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
       </div>
     </div>
   )

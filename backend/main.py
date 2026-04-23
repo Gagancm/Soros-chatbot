@@ -31,6 +31,7 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 from rag import create_default_rag_service, RAGService
+from rag.skills import SKILL_DEFINITIONS, execute_skill
 from local_llm import (
     build_local_prompt,
     generate_local_with_limits,
@@ -85,15 +86,22 @@ GEN_CONFIG = genai.types.GenerationConfig(
 
 # --- Models ---
 
+class HistoryMessage(BaseModel):
+    role: str   # "user" | "assistant"
+    content: str
+
 class RAGRequest(BaseModel):
     message: str
     file_context: Optional[str] = None
     mode: Optional[str] = None
     model_provider: Optional[Literal["gemini", "local"]] = None
     local_model_name: Optional[str] = None
+    history: Optional[list[HistoryMessage]] = None
 
 class RAGResponse(BaseModel):
     reply: str
+    skills_used: Optional[list[str]] = None
+    sources: Optional[list[dict]] = None
 
 class PairsRequest(BaseModel):
     stock1: str
@@ -139,12 +147,78 @@ def _generate_gemini_reply(prompt: str) -> str:
     return text
 
 
+def _generate_gemini_with_skills(
+    prompt: str,
+    history: list[dict] | None = None,
+) -> tuple[str, list[str]]:
+    """Agentic tool-calling loop. Returns (reply_text, skills_invoked)."""
+    key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not key:
+        raise RuntimeError("Set GOOGLE_API_KEY or GEMINI_API_KEY env var.")
+    genai.configure(api_key=key)
+    model_name = os.getenv("GEMINI_MODEL_NAME", "models/gemini-2.5-flash")
+
+    # Convert history to Gemini format (role: "user"/"model")
+    gemini_history = []
+    for msg in (history or []):
+        role = "model" if msg["role"] == "assistant" else "user"
+        gemini_history.append({"role": role, "parts": [msg["content"]]})
+
+    model = genai.GenerativeModel(model_name, tools=SKILL_DEFINITIONS)
+    chat = model.start_chat(history=gemini_history)
+    skills_invoked: list[str] = []
+
+    response = chat.send_message(prompt, generation_config=GEN_CONFIG)
+
+    for _ in range(3):
+        fn_calls = [
+            part.function_call
+            for part in (getattr(response, "parts", []) or [])
+            if getattr(getattr(part, "function_call", None), "name", "")
+        ]
+
+        if not fn_calls:
+            text = _extract_text(response)
+            return (text or SAFETY_MSG), skills_invoked
+
+        fn_response_parts = []
+        for fn in fn_calls:
+            skill_name = fn.name
+            skills_invoked.append(skill_name)
+            result = execute_skill(skill_name, dict(fn.args))
+            fn_response_parts.append(
+                genai.protos.Part(
+                    function_response=genai.protos.FunctionResponse(
+                        name=skill_name,
+                        response=result,
+                    )
+                )
+            )
+
+        response = chat.send_message(fn_response_parts, generation_config=GEN_CONFIG)
+
+    text = _extract_text(response)
+    return (text or SAFETY_MSG), skills_invoked
+
+
 def _build_full_prompt(req: "RAGRequest", result: dict) -> str:
     prompt = result["prompt"]
     if req.file_context:
         prompt += f"\n\n[CONTEXT - UPLOADED FILE DATA]\n{req.file_context}"
     if req.mode in MODE_BOOST:
         prompt += MODE_BOOST[req.mode]
+    ticker = result.get("ticker")
+    if ticker:
+        prompt += (
+            f"\n\n[SKILL INSTRUCTIONS]\n"
+            f"The user mentioned ticker {ticker}. You have tools available. "
+            f"You MUST call at least one relevant tool before responding:\n"
+            f"- assess_reflexivity('{ticker}') — to score Soros reflexivity\n"
+            f"- get_market_snapshot('{ticker}') — for live price/MA/volatility\n"
+            f"- analyze_financials('{ticker}') — for fundamental ratios\n"
+            f"Call the most relevant tool(s) first, then synthesize the results "
+            f"into your educational response."
+        )
     return prompt
 
 
@@ -263,11 +337,22 @@ async def rag_chat(req: RAGRequest):
         raise HTTPException(500, detail=f"RAG unavailable: {_rag_err}")
 
     result = _rag.build_rag_request(req.message)
-    if result.get("error"):
-        return RAGResponse(reply=result["error"])
-
-    prompt = _build_full_prompt(req, result)
     provider = normalize_model_provider(req.model_provider)
+
+    if result.get("error"):
+        # RAG miss: local model has no fallback; Gemini can still try skills
+        if provider == "local":
+            return RAGResponse(reply=result["error"])
+        prompt = (
+            f"You are a Soros-inspired financial advisor assistant.\n"
+            f"The user asked: {req.message}\n\n"
+            f"No relevant Soros Q&A was found for this topic. "
+            f"Use your available tools if the question concerns market data, "
+            f"financial analysis, position sizing, or reflexivity. "
+            f"Otherwise explain what topics you can help with."
+        )
+    else:
+        prompt = _build_full_prompt(req, result)
 
     try:
         if provider == "local":
@@ -282,9 +367,22 @@ async def rag_chat(req: RAGRequest):
                 ),
                 req.local_model_name,
             )
+            return RAGResponse(reply=text)
         else:
-            text = await asyncio.to_thread(_generate_gemini_reply, prompt)
-        return RAGResponse(reply=text)
+            # Keep last 10 messages (5 turns) to stay within token budget
+            history = [m.model_dump() for m in (req.history or [])[-10:]]
+            text, skills = await asyncio.to_thread(
+                _generate_gemini_with_skills, prompt, history
+            )
+            sources = [
+                {"question": item["question"], "score": round(item["score"], 3)}
+                for item in (result.get("retrieved") or [])[:3]
+            ]
+            return RAGResponse(
+                reply=text,
+                skills_used=skills if skills else None,
+                sources=sources if sources else None,
+            )
     except HTTPException:
         raise
     except Exception as exc:

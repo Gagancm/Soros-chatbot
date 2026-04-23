@@ -191,6 +191,10 @@ export function ChatPage() {
           mode: activeMode || null,
           model_provider: modelProvider,
           local_model_name: modelProvider === 'local' ? localModelName : null,
+          history: nextMessages
+            .slice(0, -1)                          // exclude current user message
+            .filter((m) => m.role === 'user' || m.role === 'assistant')
+            .map((m) => ({ role: m.role, content: m.content })),
         }),
       })
 
@@ -201,7 +205,15 @@ export function ChatPage() {
 
       const data = await res.json()
       const reply = data.reply || 'No reply from backend.'
-      const updated = [...nextMessages, { role: 'assistant', content: reply }]
+      const updated = [
+        ...nextMessages,
+        {
+          role: 'assistant',
+          content: reply,
+          ...(data.skills_used?.length ? { skills_used: data.skills_used } : {}),
+          ...(data.sources?.length ? { sources: data.sources } : {}),
+        },
+      ]
       setMessages(updated)
       saveChatNow(currentChatId, updated)
       setAttachedFile(null)

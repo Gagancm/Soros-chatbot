@@ -38,6 +38,7 @@ export GEMINI_API_KEY=your-key-here
 Start the server:
 
 ```bash
+cd backend
 uvicorn main:app --reload
 ```
 
@@ -119,6 +120,20 @@ Users can upload CSV/XLSX files (max 10MB) through the chat UI. These files are 
 | Endpoint | Method | Description |
 |---|---|---|
 | `GET /health` | GET | Server status and RAG availability |
+
+## Skill System (Agentic Tool Calling)
+
+When using the Gemini provider, the chatbot runs an agentic tool-calling loop: Gemini decides which skills to invoke based on the user's question, executes them, and synthesizes the results into its response. Invoked skills appear as badges above the reply in the UI.
+
+| Skill | Trigger | Description |
+|---|---|---|
+| `get_market_snapshot` | Questions about price / technicals | Live price, 20/50-day MA, volatility via yfinance |
+| `analyze_financials` | Questions about fundamentals | Gross margin, net margin, D/E ratio evaluated against Soros criteria |
+| `run_pairs_backtest` | Questions about two stocks together | Cointegration test + current z-score of the price spread |
+| `calculate_position_size` | Questions about how much to invest | Kelly criterion sizing with Soros-style asymmetric risk management |
+| `assess_reflexivity` | Questions about over/undervaluation | Reflexivity score (0–100) based on momentum vs. earnings divergence |
+
+Skills are defined in `rag/skills.py`. The loop runs up to 3 rounds and falls back gracefully if no tool call is needed.
 
 ## Query Modes
 

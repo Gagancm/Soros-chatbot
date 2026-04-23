@@ -80,7 +80,17 @@ class RAGService:
             raise FileNotFoundError(f"Q&A dataset not found: {path}")
 
         df = pd.read_excel(path)
-        renames = {"Questions": "Question", "Answers": "Answer"}
+        renames = {
+            "Questions": "Question",
+            "questions": "Question",
+            "question": "Question",
+            "Answers": "Answer",
+            "answers": "Answer",
+            "answer": "Answer",
+            "Labels": "Label",
+            "labels": "Label",
+            "label": "Label",
+        }
         for old, new in renames.items():
             if old in df.columns and new not in df.columns:
                 df.rename(columns={old: new}, inplace=True)

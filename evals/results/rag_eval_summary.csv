@@ -1,0 +1,8 @@
+metric,value
+total_questions,30
+label_match_at_1,0.5
+label_match_at_5,0.7333
+keyword_match_at_5,0.9333
+average_top_score,0.7705
+average_latency_ms,95.82
+no_retrieval_count,0

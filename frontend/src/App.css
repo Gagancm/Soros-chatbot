@@ -108,7 +108,8 @@ button, input, textarea, select { font-family: inherit; color: inherit; }
 .app-shell {
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: transparent;
   position: relative;
   z-index: 1;
@@ -330,15 +331,17 @@ body.has-video-bg .sidebar__search-placeholder { color: var(--text-muted); }
 /* ============================================================ APP MAIN */
 .app-main {
   min-width: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: transparent;
+  overflow-y: auto;
 }
 
 /* Header */
 .app-header {
-  height: var(--header-h);
-  padding: 0 28px;
+  min-height: var(--header-h);
+  padding: 16px 28px;
   background: var(--bg);
   display: flex;
   align-items: center;

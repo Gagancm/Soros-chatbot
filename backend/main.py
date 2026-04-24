@@ -98,7 +98,7 @@ MODE_BOOST = {
 }
 
 GEN_CONFIG = genai.types.GenerationConfig(
-    temperature=0.4, top_p=0.9, top_k=40, max_output_tokens=1024,
+    temperature=0.4, top_p=0.9, top_k=40, max_output_tokens=4096,
 )
 
 
